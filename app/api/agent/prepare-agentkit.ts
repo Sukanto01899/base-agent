@@ -11,8 +11,7 @@ import {
   x402ActionProvider,
 } from "@coinbase/agentkit";
 import * as fs from "fs";
-import { Address, Hex, LocalAccount } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import type { Address, Hex, LocalAccount } from "viem";
 
 /**
  * AgentKit Integration Route
@@ -80,7 +79,11 @@ export async function prepareAgentkitAndWalletProvider(): Promise<{
     try {
       walletData = JSON.parse(fs.readFileSync(WALLET_DATA_FILE, "utf8")) as WalletData;
       if (walletData.ownerAddress) owner = walletData.ownerAddress;
-      else if (walletData.privateKey) owner = privateKeyToAccount(walletData.privateKey as Hex);
+      else if (walletData.privateKey) {
+        // Lazy-load viem to avoid server bundle evaluation during build
+        const { privateKeyToAccount } = await import("viem/accounts");
+        owner = privateKeyToAccount(walletData.privateKey as Hex);
+      }
       else
         console.log(
           `No ownerAddress or privateKey found in ${WALLET_DATA_FILE}, will create a new CDP server account as owner`,
