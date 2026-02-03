@@ -1,13 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Avoid bundling agentkit/viem into the server build (fixes noble/sha3 crash)
-  serverExternalPackages: [
+  // Keep viem externalized, but bundle agentkit to avoid ESM/CJS require issues on Vercel
+  serverExternalPackages: ["viem", "@noble/hashes"],
+  transpilePackages: [
     "@coinbase/agentkit",
     "@coinbase/agentkit-langchain",
     "@coinbase/agentkit-vercel-ai-sdk",
-    "viem",
-    "@noble/hashes",
+    "@coinbase/cdp-sdk",
   ],
 };
 
